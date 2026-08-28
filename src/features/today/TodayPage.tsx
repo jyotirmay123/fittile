@@ -3,6 +3,7 @@ import { Button } from '../../design/components/Button'
 import { Card } from '../../design/components/Card'
 import { ProgressRing } from '../../design/components/ProgressRing'
 import './today.css'
+import { Link } from 'react-router-dom'
 
 const muscles = [
   { name: 'Chest', value: 94, state: 'Fresh' },
@@ -58,7 +59,7 @@ export function TodayPage() {
               </div>
             ))}
           </div>
-          <button className="text-link">View body map <ChevronRight size={17} /></button>
+          <Link className="text-link" to="/recovery">View body map <ChevronRight size={17} /></Link>
         </Card>
 
         <Card className="nutrition-card" aria-labelledby="nutrition-title">

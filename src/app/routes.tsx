@@ -4,6 +4,8 @@ import { AuthCallbackPage } from '../features/auth/AuthCallbackPage'
 import { ProfilePage } from '../features/settings/ProfilePage'
 import { OnboardingPage } from '../features/onboarding/OnboardingPage'
 import { TrainPage } from '../features/training/TrainPage'
+import { RecoveryPage } from '../features/recovery/RecoveryPage'
+import { FoodPage } from '../features/nutrition/FoodPage'
 
 function PlaceholderPage({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
   return (
@@ -22,7 +24,8 @@ export function AppRoutes() {
     <Routes>
       <Route path="/" element={<TodayPage />} />
       <Route path="/train" element={<TrainPage />} />
-      <Route path="/food" element={<PlaceholderPage eyebrow="Daily fuel" title="Nutrition, without guesswork." description="Meals, barcodes and editable photo estimates will live here." />} />
+      <Route path="/recovery" element={<RecoveryPage />} />
+      <Route path="/food" element={<FoodPage />} />
       <Route path="/progress" element={<PlaceholderPage eyebrow="Your signal" title="See the work add up." description="Training, recovery, activity and nutrition trends in one place." />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/onboarding" element={<OnboardingPage />} />
