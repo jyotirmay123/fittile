@@ -3,7 +3,7 @@ import { Button } from '../../design/components/Button'
 import { Card } from '../../design/components/Card'
 import { ProgressRing } from '../../design/components/ProgressRing'
 import './today.css'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 const muscles = [
   { name: 'Chest', value: 94, state: 'Fresh' },
@@ -12,6 +12,8 @@ const muscles = [
 ]
 
 export function TodayPage() {
+  const navigate = useNavigate()
+
   return (
     <div className="today-page">
       <header className="page-header">
@@ -40,7 +42,7 @@ export function TodayPage() {
             {muscles.map((muscle) => <span key={muscle.name}>{muscle.name} {muscle.value}%</span>)}
           </div>
           <div className="workout-hero__actions">
-            <Button>Start workout <ArrowUpRight size={18} /></Button>
+            <Button onClick={() => navigate('/train')}>Start workout <ArrowUpRight size={18} /></Button>
             <Button variant="ghost">Adjust</Button>
           </div>
         </Card>
