@@ -4,6 +4,7 @@ export const FitileArchiveSchema = z.object({
   format: z.literal('fittile-archive'),
   version: z.string().refine((version) => /^1\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/.test(version), 'Unsupported Fitile archive version'),
   createdAt: z.iso.datetime(),
+  checksum: z.string().optional(),
   data: z.object({
     workouts: z.array(z.unknown()),
     meals: z.array(z.unknown()),

@@ -1,0 +1,3 @@
+export type AccountSnapshot={workouts:Record<string,unknown>[];meals:Record<string,unknown>[];activities:Record<string,unknown>[];measurements:Record<string,unknown>[];settings:Record<string,unknown>;equipment:Record<string,unknown>[];[key:string]:unknown}
+const checksum=(value:string)=>{let hash=2166136261;for(const character of value){hash^=character.charCodeAt(0);hash=Math.imul(hash,16777619)}return `fnv1a-${(hash>>>0).toString(16).padStart(8,'0')}`}
+export function createArchive(snapshot:AccountSnapshot,at=new Date()){const data=structuredClone(snapshot);return{format:'fittile-archive' as const,version:'1.0.0',createdAt:at.toISOString(),checksum:checksum(JSON.stringify(data)),data}}
