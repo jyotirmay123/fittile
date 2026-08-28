@@ -6,18 +6,7 @@ import { OnboardingPage } from '../features/onboarding/OnboardingPage'
 import { TrainPage } from '../features/training/TrainPage'
 import { RecoveryPage } from '../features/recovery/RecoveryPage'
 import { FoodPage } from '../features/nutrition/FoodPage'
-
-function PlaceholderPage({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
-  return (
-    <div className="page-placeholder">
-      <div className="page-placeholder__inner">
-        <p className="eyebrow">{eyebrow}</p>
-        <h1>{title}</h1>
-        <p className="muted">{description}</p>
-      </div>
-    </div>
-  )
-}
+import { ProgressPage } from '../features/progress/ProgressPage'
 
 export function AppRoutes() {
   return (
@@ -26,7 +15,7 @@ export function AppRoutes() {
       <Route path="/train" element={<TrainPage />} />
       <Route path="/recovery" element={<RecoveryPage />} />
       <Route path="/food" element={<FoodPage />} />
-      <Route path="/progress" element={<PlaceholderPage eyebrow="Your signal" title="See the work add up." description="Training, recovery, activity and nutrition trends in one place." />} />
+      <Route path="/progress" element={<ProgressPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/onboarding" element={<OnboardingPage />} />
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
