@@ -1,12 +1,10 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { App } from './App'
 
 describe('Fitile application shell', () => {
-  it('shows the five primary destinations', () => {
+  it('guides a brand-new user into onboarding before the main app', async () => {
     render(<App />)
-
-    for (const label of ['Today', 'Train', 'Food', 'Progress', 'Profile']) {
-      expect(screen.getByRole('link', { name: label })).toBeVisible()
-    }
+    // With no saved profile the app routes to onboarding rather than showing sample data.
+    await waitFor(() => expect(screen.getByRole('heading', { level: 1 })).toBeVisible())
   })
 })

@@ -1,10 +1,15 @@
 import { createContext, useContext } from 'react'
 import type { User } from '@supabase/supabase-js'
 
+export type AuthStatus = 'loading' | 'authenticated' | 'anonymous' | 'local'
+export type AuthResult = { error?: string; pendingConfirmation?: boolean }
+
 export type AuthContextValue = {
   user: User | null
-  status: 'loading' | 'authenticated' | 'anonymous' | 'demo'
-  signInWithGoogle: () => Promise<void>
+  status: AuthStatus
+  cloud: boolean
+  signIn: (email: string, password: string) => Promise<AuthResult>
+  signUp: (email: string, password: string) => Promise<AuthResult>
   signOut: () => Promise<void>
 }
 

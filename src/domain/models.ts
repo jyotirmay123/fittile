@@ -31,6 +31,8 @@ export type Exercise = {
 
 export type UserEquipment = {
   id: string
+  /** Stable catalog key; `id` is a UUID so the record can sync to Postgres. */
+  catalogId?: string
   name: string
   capabilities: EquipmentCapability[]
   minKg?: number
@@ -119,6 +121,26 @@ export type BodyMeasurement = {
   hipCm?: number
   armCm?: number
   thighCm?: number
+}
+
+export type WorkoutSession = {
+  id: string
+  source: 'deterministic' | 'ai'
+  split: TrainingSplit
+  status: 'active' | 'completed' | 'abandoned'
+  plan?: unknown
+  startedAt: string
+  completedAt?: string
+}
+
+export type HydrationLog = { id: string; milliliters: number; loggedAt: string }
+
+export type SorenessCheckin = {
+  id: string
+  muscleId: MuscleId
+  soreness: number
+  readinessOverride?: number
+  checkedAt: string
 }
 
 export type Profile = {

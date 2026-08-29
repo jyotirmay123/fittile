@@ -13,7 +13,9 @@
     "test:e2e": "playwright test",
     "android:sync": "npm run build && cap sync android",
     "android:apk": "npm run android:sync && cd android && ./gradlew assembleDebug",
-    "verify": "npm run test:run && npm run typecheck && npm run lint && npm run build"
+    "verify": "npm run test:run && npm run typecheck && npm run lint && npm run build",
+    "build:pages": "VITE_BASE_PATH=/fittile/ npm run build",
+    "deploy": "./scripts/deploy-pages.sh"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",

@@ -1,4 +1,16 @@
-export type SyncEntity = 'setLogs' | 'workoutSessions' | 'mealEntries' | 'activities' | 'measurements' | 'settings'
+export type SyncEntity =
+  | 'setLogs'
+  | 'workoutSessions'
+  | 'mealEntries'
+  | 'activities'
+  | 'measurements'
+  | 'settings'
+  | 'profile'
+  | 'equipment'
+  | 'recoveryEvents'
+  | 'sorenessCheckins'
+  | 'foods'
+  | 'hydration'
 
 export type OutboxOperation = {
   id: string

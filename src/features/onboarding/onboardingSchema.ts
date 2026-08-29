@@ -6,6 +6,8 @@ export const OnboardingSchema = z.object({
   equipment: z.array(z.string()).min(1),
   workoutDays: z.number().int().min(1).max(7),
   workoutMinutes: z.number().int().min(15).max(90),
+  weightKg: z.number().min(30).max(250),
+  experience: z.enum(['beginner', 'intermediate', 'advanced']),
 })
 
 export type OnboardingData = z.infer<typeof OnboardingSchema>

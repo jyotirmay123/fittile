@@ -47,3 +47,8 @@
   .activity-card { grid-column: 1 / -1; }
   .quick-add { bottom: 28px; }
 }
+
+.today-syncbar { margin: 4px 0 14px; }
+.sync-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--surface-soft); color: var(--ink-muted); font-size: .78rem; font-weight: 650; }
+.sync-pill--ok { color: #1c7a3d; }
+.sync-pill svg { flex: none; }

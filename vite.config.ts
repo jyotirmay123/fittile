@@ -3,13 +3,17 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { manifest } from './src/pwa/manifest.ts'
 
+// Set VITE_BASE_PATH=/fittile/ when publishing to a GitHub Pages project site.
+const base = process.env.VITE_BASE_PATH ?? '/'
+
 export default defineConfig({
+  base,
   plugins: [react(), VitePWA({
     registerType: 'autoUpdate',
     includeAssets: ['icons/icon-192.png', 'icons/icon-512.png', 'og.png', 'offline.html'],
     manifest,
     workbox: {
-      navigateFallback: '/index.html',
+      navigateFallback: `${base}index.html`,
       globPatterns: ['**/*.{js,css,html,png,woff2}'],
       runtimeCaching: [{
         urlPattern: /^https:\/\/world\.openfoodfacts\.org\//,

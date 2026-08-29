@@ -7,7 +7,7 @@ import { AppProviders } from './AppProviders'
 export function App() {
   return (
     <AppErrorBoundary>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <AppProviders>
           <a className="skip-link" href="#main-content">Skip to content</a>
           <div className="app-shell">
