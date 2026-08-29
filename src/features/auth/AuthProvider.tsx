@@ -34,7 +34,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
       async signUp(email, password): Promise<AuthResult> {
         if (!supabase) return { error: 'Cloud sync is not configured.' }
         const { data, error } = await supabase.auth.signUp({ email: email.trim(), password })
-        if (error) return { error: error.message }
+        if (error) {
+          // A deployment can close sign-ups with a database allowlist; Supabase
+          // surfaces that as a generic database error.
+          if (/database error saving new user/i.test(error.message)) {
+            return { error: 'Sign-ups are closed for this Fitile deployment.' }
+          }
+          return { error: error.message }
+        }
         // If the project requires email confirmation, no session is returned yet.
         return data.session ? {} : { pendingConfirmation: true }
       },
