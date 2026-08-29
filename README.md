@@ -22,10 +22,14 @@ The deterministic coach is the default. An optional AI coach can propose variety
 ## Run locally
 
 ```bash
-npm install
+make install
 cp .env.example .env      # add your Supabase URL + publishable key
-npm run dev
+make dev                  # http://localhost:5173
 ```
+
+`make` on its own lists every command (run, build, test, deploy, APK, database
+and account management). `make dev-local` runs without a cloud account if you
+just want to poke at the app.
 
 Without Supabase values Fitile runs in local-only mode: everything works, but data
 stays on that device. Anything prefixed `VITE_` is bundled into the browser, so
