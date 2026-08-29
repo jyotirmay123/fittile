@@ -1,5 +1,5 @@
 import type { FitileRepository } from '../local/repositories'
-import type { SyncStatus, SyncTransport } from './types'
+import type { SyncEntity, SyncStatus, SyncTransport } from './types'
 
 export class SyncEngine {
   status: SyncStatus = 'idle'
@@ -26,6 +26,28 @@ export class SyncEngine {
       }
     } finally {
       this.running = false
+    }
+  }
+
+  /**
+   * Restores the account from the server. Runs before the app decides whether a
+   * user has onboarded, so signing in on a new device does not look like a new
+   * account. Local pending writes are pushed first so they are never overwritten.
+   */
+  async hydrate(userId: string): Promise<boolean> {
+    if (!this.transport.pull) return true
+    try {
+      await this.flush()
+      const pulled = await this.transport.pull(userId)
+      for (const [entity, records] of Object.entries(pulled)) {
+        if (records?.length) await this.repository.applyServerRecords(entity as SyncEntity, records)
+      }
+      this.lastError = undefined
+      return true
+    } catch (error) {
+      this.lastError = error instanceof Error ? error.message : String(error)
+      this.status = error instanceof SyncAuthError ? 'auth-required' : error instanceof TypeError ? 'offline' : 'error'
+      return false
     }
   }
 

@@ -13,6 +13,7 @@ const sharedDb = new FitileDb()
 
 function SyncController({ repository, cloud, children }: PropsWithChildren<{ repository: FitileRepository; cloud: boolean }>) {
   const [status, setStatus] = useState<SyncStatus>('idle')
+  const [pulled, setPulled] = useState(false)
   const outbox = useFitileLiveQuery<OutboxOperation[] | null>(() => repository.pendingOperations(), null)
   const pending = outbox?.length ?? null
 
@@ -23,8 +24,22 @@ function SyncController({ repository, cloud, children }: PropsWithChildren<{ rep
     [repository, cloud],
   )
 
+  // Pull the account down before anything reads it, so a new device restores
+  // instead of looking like a brand-new user.
+  // Local-only mode has nothing to restore, so it is hydrated by definition.
+  const hydrated = !engine || pulled
+
   useEffect(() => {
     if (!engine) return
+    let cancelled = false
+    void engine.hydrate(repository.userId).then(() => {
+      if (!cancelled) setPulled(true)
+    })
+    return () => { cancelled = true }
+  }, [engine, repository])
+
+  useEffect(() => {
+    if (!engine || !hydrated) return
     let cancelled = false
     const flush = async () => {
       await engine.flush()
@@ -40,11 +55,11 @@ function SyncController({ repository, cloud, children }: PropsWithChildren<{ rep
       window.removeEventListener('online', onOnline)
       window.clearInterval(interval)
     }
-  }, [engine, pending])
+  }, [engine, hydrated, pending])
 
   const value = useMemo<SyncState>(
-    () => ({ mode: cloud ? 'cloud' : 'local', status, pending }),
-    [cloud, status, pending],
+    () => ({ mode: cloud ? 'cloud' : 'local', status, pending, hydrated }),
+    [cloud, status, pending, hydrated],
   )
   return <SyncStatusContext.Provider value={value}>{children}</SyncStatusContext.Provider>
 }

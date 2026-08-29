@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { DataProvider } from '../data/DataProvider'
 import { useFitileLiveQuery } from '../data/useLiveQuery'
 import { useRepository } from '../data/useRepository'
+import { useSyncStatus } from '../data/syncStatus'
 import { AuthProvider } from '../features/auth/AuthProvider'
 import { SignInPage } from '../features/auth/SignInPage'
 import { useAuth } from '../features/auth/authContext'
@@ -19,9 +20,12 @@ function Splash({ label }: { label: string }) {
 function OnboardingGate({ children }: PropsWithChildren) {
   const repository = useRepository()
   const location = useLocation()
+  const sync = useSyncStatus()
   const query = useCallback(async () => (await repository.getProfile()) ?? null, [repository])
   const profile = useFitileLiveQuery<Profile | null | undefined>(query, undefined)
 
+  // Never treat a signed-in account as new until the server data has been restored.
+  if (!sync.hydrated) return <Splash label="Restoring your account…" />
   if (profile === undefined) return <Splash label="Loading your data…" />
   if (profile === null && location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />

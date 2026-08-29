@@ -53,6 +53,18 @@ export function createFitileRepository(db: FitileDb, userId: string) {
         const records = (await table.where('userId').equals(userId).toArray()) as (T & SyncMeta)[]
         return records.filter((record) => !record.deletedAt)
       },
+      /** Writes a record received from the server without echoing it back to the outbox. */
+      async putFromServer(item: T, deleted: boolean) {
+        const timestamp = nowIso()
+        const existing = (await table.get(item.id)) as (T & SyncMeta) | undefined
+        await table.put({
+          ...item,
+          userId,
+          createdAt: existing?.createdAt ?? timestamp,
+          updatedAt: timestamp,
+          deletedAt: deleted ? timestamp : undefined,
+        } as T & SyncMeta)
+      },
       async remove(id: string) {
         const record = (await table.get(id)) as (T & SyncMeta) | undefined
         if (!record || record.userId !== userId) return
@@ -88,6 +100,19 @@ export function createFitileRepository(db: FitileDb, userId: string) {
     userId,
     // Collections
     setLogs, sessions, recoveryEvents, soreness, foods, meals, hydration, activities, measurements, equipment,
+
+    /** Applies a batch of server records for one entity, bypassing the outbox. */
+    async applyServerRecords(entity: SyncEntity, records: { id: string; deleted: boolean; record: unknown }[]) {
+      const byEntity: Partial<Record<SyncEntity, { putFromServer: (item: never, deleted: boolean) => Promise<void> }>> = {
+        setLogs, workoutSessions: sessions, recoveryEvents, sorenessCheckins: soreness,
+        foods, mealEntries: meals, hydration, activities, measurements, equipment, profile: profiles,
+      }
+      const store = byEntity[entity]
+      if (!store) return
+      for (const item of records) {
+        await store.putFromServer(item.record as never, item.deleted)
+      }
+    },
 
     // Profile is a per-user singleton keyed by the auth user id.
     async getProfile() {

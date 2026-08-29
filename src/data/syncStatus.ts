@@ -8,9 +8,11 @@ export type SyncState = {
   status: SyncStatus
   /** null until the outbox has been read, so the UI never claims "synced" prematurely. */
   pending: number | null
+  /** False until the account has been restored from the server. */
+  hydrated: boolean
 }
 
-export const SyncStatusContext = createContext<SyncState>({ mode: 'local', status: 'idle', pending: null })
+export const SyncStatusContext = createContext<SyncState>({ mode: 'local', status: 'idle', pending: null, hydrated: true })
 
 export function useSyncStatus() {
   return useContext(SyncStatusContext)

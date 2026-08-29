@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { OutboxOperation, SyncEntity, SyncTransport } from '../../data/sync/types'
+import type { OutboxOperation, PulledRecords, SyncEntity, SyncTransport } from '../../data/sync/types'
 import { SyncAuthError } from '../../data/sync/SyncEngine'
 
 const tableByEntity: Record<SyncEntity, string> = {
@@ -50,6 +50,40 @@ export function toSupabaseMutation(operation: OutboxOperation) {
   }
 }
 
+const toCamelCase = (key: string) => key.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase())
+
+const camelRow = (row: Record<string, unknown>, drop: string[]) =>
+  Object.fromEntries(
+    Object.entries(row)
+      .filter(([key, value]) => !drop.includes(key) && value !== null)
+      .map(([key, value]) => [toCamelCase(key), value]),
+  )
+
+const META = ['user_id', 'created_at', 'updated_at', 'deleted_at']
+
+// Inverse of the builders above: turns a server row back into a domain record so a
+// signed-in account can be restored on a device that has never seen it.
+const fromRow: Record<SyncEntity, (row: Record<string, unknown>) => unknown> = {
+  profile: (row) => ({ ...(row.profile_data as object), id: row.id }),
+  equipment: (row) => ({ ...(row.equipment_data as object), id: row.id }),
+  workoutSessions: (row) => ({ ...(row.session_data as object), id: row.id }),
+  activities: (row) => ({ ...(row.activity_data as object), id: row.id }),
+  measurements: (row) => ({ ...(row.measurement_data as object), id: row.id }),
+  foods: (row) => ({ ...(row.food_data as object), id: row.id }),
+  mealEntries: (row) => ({ ...(row.food_snapshot as object), id: row.id }),
+  settings: (row) => ({ ...(row.value as object), id: row.id }),
+  setLogs: (row) => camelRow(row, META),
+  recoveryEvents: (row) => camelRow(row, META),
+  sorenessCheckins: (row) => camelRow(row, META),
+  hydration: (row) => camelRow(row, META),
+}
+
+// Entities worth restoring on a new device (reference data is bundled in the app).
+const pullable: SyncEntity[] = [
+  'profile', 'equipment', 'workoutSessions', 'setLogs', 'recoveryEvents',
+  'sorenessCheckins', 'mealEntries', 'hydration', 'activities', 'measurements',
+]
+
 export class SupabaseSyncTransport implements SyncTransport {
   constructor(private client: SupabaseClient) {}
 
@@ -62,5 +96,20 @@ export class SupabaseSyncTransport implements SyncTransport {
     if (error?.code === 'PGRST301' || error?.message.toLowerCase().includes('jwt')) throw new SyncAuthError(error.message)
     if (error) throw new Error(error.message)
     return { operationId: operation.id, serverUpdatedAt: new Date().toISOString() }
+  }
+
+  async pull(userId: string): Promise<PulledRecords> {
+    const result: PulledRecords = {}
+    for (const entity of pullable) {
+      const { data, error } = await this.client.from(tableByEntity[entity]).select('*').eq('user_id', userId)
+      if (error?.code === 'PGRST301' || error?.message.toLowerCase().includes('jwt')) throw new SyncAuthError(error.message)
+      if (error) throw new Error(`${tableByEntity[entity]}: ${error.message}`)
+      result[entity] = (data ?? []).map((row: Record<string, unknown>) => ({
+        id: String(row.id),
+        deleted: Boolean(row.deleted_at),
+        record: fromRow[entity](row),
+      }))
+    }
+    return result
   }
 }
